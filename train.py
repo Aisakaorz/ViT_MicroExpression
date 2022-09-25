@@ -5,7 +5,7 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 
 import torchvision.datasets as datasets
-from models.vision_transformer import vit_large_patch16_224
+from models.vision_transformer import vit_base_patch16_224_in21k
 from torchtoolbox.tools import mixup_data, mixup_criterion
 from torchtoolbox.transform import Cutout
 from tqdm import tqdm
@@ -20,7 +20,7 @@ ACC = 0
 
 if __name__ == '__main__':
     # 数据预处理
-    transform = transforms.Compose([
+    transform_train = transforms.Compose([
         transforms.Resize((224, 224)),
         Cutout(),
         transforms.ToTensor(),
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     ])
 
     # 读取数据
-    dataset_train = datasets.ImageFolder('dataset/train', transform=transform)
+    dataset_train = datasets.ImageFolder('dataset/train', transform=transform_train)
     dataset_test = datasets.ImageFolder("dataset/val", transform=transform_test)
 
     # 导入数据
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # 实例化模型并且移动到GPU
     criterion = nn.CrossEntropyLoss()
-    model_ft = vit_large_patch16_224(pretrained=True)
+    model_ft = vit_base_patch16_224_in21k(pretrained=True)
     num_ftrs = model_ft.head.in_features
     model_ft.head = nn.Linear(num_ftrs, 3, bias=True)
     nn.init.xavier_uniform_(model_ft.head.weight)
@@ -94,7 +94,7 @@ if __name__ == '__main__':
             correct = correct.data.item()
             acc = correct / len(test_loader.dataset)
             avgloss = test_loss / len(test_loader)
-            print('\nVal set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+            print('Val set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
                 avgloss, correct, len(test_loader.dataset), 100 * acc))
             if acc > ACC:
                 torch.save(model_ft, 'model_' + str(epoch) + '_' + str(round(acc, 3)) + '.pth')
