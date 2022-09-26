@@ -5,7 +5,7 @@ import torch.utils.data.distributed
 import torchvision.transforms as transforms
 
 import torchvision.datasets as datasets
-from models.vision_transformer import vit_base_patch16_224_in21k
+from models.vision_transformer import vit_base_patch16_224
 from torchtoolbox.tools import mixup_data, mixup_criterion
 from torchtoolbox.transform import Cutout
 from tqdm import tqdm
@@ -24,12 +24,12 @@ if __name__ == '__main__':
         transforms.Resize((224, 224)),
         Cutout(),
         transforms.ToTensor(),
-        transforms.Normalize([0.54629505, 0.4697144, 0.43435633], [0.2294242, 0.21425103, 0.21176621])
+        transforms.Normalize([0.5398044, 0.46666476, 0.4328882], [0.23004417, 0.21556248, 0.21320197])
     ])
     transform_test = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize([0.54629505, 0.4697144, 0.43435633], [0.2294242, 0.21425103, 0.21176621])
+        transforms.Normalize([0.5398044, 0.46666476, 0.4328882], [0.23004417, 0.21556248, 0.21320197])
     ])
 
     # 读取数据
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     # 实例化模型并且移动到GPU
     criterion = nn.CrossEntropyLoss()
-    model_ft = vit_base_patch16_224_in21k(pretrained=True)
+    model_ft = vit_base_patch16_224(pretrained=True)
     num_ftrs = model_ft.head.in_features
     model_ft.head = nn.Linear(num_ftrs, 3, bias=True)
     nn.init.xavier_uniform_(model_ft.head.weight)

@@ -1,6 +1,7 @@
 from torchvision.datasets import ImageFolder
 import torch
 from torchvision import transforms
+from tqdm import tqdm
 
 
 def get_mean_and_std(train_data):
@@ -9,7 +10,7 @@ def get_mean_and_std(train_data):
         pin_memory=True)
     mean = torch.zeros(3)
     std = torch.zeros(3)
-    for X, _ in train_loader:
+    for X, _ in tqdm(train_loader):
         for d in range(3):
             mean[d] += X[:, d, :, :].mean()
             std[d] += X[:, d, :, :].std()
