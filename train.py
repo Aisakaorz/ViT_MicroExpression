@@ -24,12 +24,12 @@ if __name__ == '__main__':
         transforms.Resize((224, 224)),
         Cutout(),
         transforms.ToTensor(),
-        transforms.Normalize([0.5398044, 0.46666476, 0.4328882], [0.23004417, 0.21556248, 0.21320197])
+        transforms.Normalize([0.50915915, 0.45180488, 0.4254344], [0.23399226, 0.22251633, 0.22062485])
     ])
     transform_test = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize([0.5398044, 0.46666476, 0.4328882], [0.23004417, 0.21556248, 0.21320197])
+        transforms.Normalize([0.50915915, 0.45180488, 0.4254344], [0.23399226, 0.22251633, 0.22062485])
     ])
 
     # 读取数据
@@ -83,7 +83,7 @@ if __name__ == '__main__':
         test_loss = 0
         correct = 0
         with torch.no_grad():
-            for data, target in test_loader:
+            for data, target in tqdm(test_loader):
                 data, target = data.to(DEVICE), target.to(DEVICE)
                 output = model_ft(data)
                 loss = criterion(output, target)
