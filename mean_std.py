@@ -5,9 +5,7 @@ from tqdm import tqdm
 
 
 def get_mean_and_std(train_data):
-    train_loader = torch.utils.data.DataLoader(
-        train_data, batch_size=1, shuffle=False, num_workers=0,
-        pin_memory=True)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=1, shuffle=False, num_workers=0, pin_memory=True)
     mean = torch.zeros(3)
     std = torch.zeros(3)
     for X, _ in tqdm(train_loader):

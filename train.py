@@ -9,7 +9,7 @@ from torchtoolbox.tools import mixup_data, mixup_criterion
 from torchtoolbox.transform import Cutout
 from tqdm import tqdm
 
-import models
+import timm.models as models
 
 # 设置全局参数
 LR = 1e-4
@@ -27,13 +27,13 @@ if __name__ == '__main__':
         # transforms.RandomVerticalFlip(),
         Cutout(),
         transforms.ToTensor(),
-        transforms.Normalize([0.50915915, 0.45180488, 0.4254344], [0.23399226, 0.22251633, 0.22062485])
+        transforms.Normalize([0.5325965, 0.43569186, 0.39240554], [0.23322931, 0.21355365, 0.20632775])
     ])
     transform_test = transforms.Compose([
         transforms.Resize(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize([0.50915915, 0.45180488, 0.4254344], [0.23399226, 0.22251633, 0.22062485])
+        transforms.Normalize([0.5325965, 0.43569186, 0.39240554], [0.23322931, 0.21355365, 0.20632775])
     ])
 
     # 读取数据
@@ -71,7 +71,6 @@ if __name__ == '__main__':
             adam.step()
             lr = adam.state_dict()['param_groups'][0]['lr']
             train_sum_loss += loss.data.item()
-
             # 更新信息
             loop.set_description(f'Epoch [{epoch}/{EPOCHS}] Batch')
             loop.set_postfix(train_loss=loss.item(),
