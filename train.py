@@ -27,18 +27,19 @@ if __name__ == '__main__':
         # transforms.RandomVerticalFlip(),
         Cutout(),
         transforms.ToTensor(),
-        transforms.Normalize([0.5325965, 0.43569186, 0.39240554], [0.23322931, 0.21355365, 0.20632775])
+        transforms.Normalize([0.5293867, 0.43571004, 0.38876376], [0.23444784, 0.21480347, 0.20751609])
     ])
     transform_test = transforms.Compose([
         transforms.Resize(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize([0.5325965, 0.43569186, 0.39240554], [0.23322931, 0.21355365, 0.20632775])
+        transforms.Normalize([0.5293867, 0.43571004, 0.38876376], [0.23444784, 0.21480347, 0.20751609])
     ])
 
     # 读取数据
     dataset_train = datasets.ImageFolder('dataset/train', transform=transform_train)
     dataset_test = datasets.ImageFolder("dataset/val", transform=transform_test)
+    print(dataset_train.class_to_idx)
 
     # 导入数据
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
@@ -52,7 +53,7 @@ if __name__ == '__main__':
     nn.init.xavier_uniform_(model.head.weight)
     model.to(DEVICE)
 
-    # 选择简单暴力的Adam优化器，学习率调低
+    # Adam优化器，学习率调低
     adam = optim.Adam(model.parameters(), lr=LR)
     optimizer = optim.lr_scheduler.CosineAnnealingLR(optimizer=adam, T_max=20, eta_min=1e-9)
 
