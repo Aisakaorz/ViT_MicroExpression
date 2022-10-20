@@ -1,3 +1,4 @@
+import timm.models as models
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
@@ -5,16 +6,16 @@ import torch.utils.data.distributed
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
+from tensorboardX import SummaryWriter
 from torchtoolbox.tools import mixup_data, mixup_criterion
 from torchtoolbox.transform import Cutout
 from tqdm import tqdm
 
-import timm.models as models
 
 # 设置全局参数
 LR = 1e-4
 BATCH_SIZE = 32
-EPOCHS = 100
+EPOCHS = 30
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 ACC = 0
 
@@ -27,13 +28,13 @@ if __name__ == '__main__':
         # transforms.RandomVerticalFlip(),
         Cutout(),
         transforms.ToTensor(),
-        transforms.Normalize([0.5293867, 0.43571004, 0.38876376], [0.23444784, 0.21480347, 0.20751609])
+        transforms.Normalize([0.53218746, 0.42445263, 0.37205878], [0.24561162, 0.21718305, 0.20601882])
     ])
     transform_test = transforms.Compose([
         transforms.Resize(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize([0.5293867, 0.43571004, 0.38876376], [0.23444784, 0.21480347, 0.20751609])
+        transforms.Normalize([0.53218746, 0.42445263, 0.37205878], [0.24561162, 0.21718305, 0.20601882])
     ])
 
     # 读取数据
@@ -47,21 +48,26 @@ if __name__ == '__main__':
 
     # 实例化模型并且移动到GPU
     criterion = nn.CrossEntropyLoss()
-    model = models.vit_base_patch16_224(pretrained=True)
-    num_ftrs = model.head.in_features
-    model.head = nn.Linear(num_ftrs, 3, bias=True)
-    nn.init.xavier_uniform_(model.head.weight)
+    model = models.vgg19(pretrained=True, num_classes=3)
+    # model = models.resnet18(pretrained=True, num_classes=3)
+    # model = models.vit_large_patch16_224(pretrained=True, num_classes=3)
+    # num_ftrs = model.head.in_features
+    # model.head = nn.Linear(num_ftrs, 3, bias=True)
+    # nn.init.xavier_uniform_(model.head.weight)
     model.to(DEVICE)
 
     # Adam优化器，学习率调低
     adam = optim.Adam(model.parameters(), lr=LR)
     optimizer = optim.lr_scheduler.CosineAnnealingLR(optimizer=adam, T_max=20, eta_min=1e-9)
 
+    # tensorboard
+    writer = SummaryWriter("logs")
+
     for epoch in range(1, EPOCHS + 1):
         # 训练
         model.train()
         train_sum_loss = 0
-        loop = tqdm(enumerate(train_loader), total=len(train_loader), leave=True)
+        loop = tqdm(enumerate(train_loader), total=len(train_loader))
         for batch_idx, (data, target) in loop:
             data, target = data.to(DEVICE, non_blocking=True), target.to(DEVICE, non_blocking=True)
             data, labels_a, labels_b, lam = mixup_data(data, target)
@@ -74,10 +80,11 @@ if __name__ == '__main__':
             train_sum_loss += loss.data.item()
             # 更新信息
             loop.set_description(f'Epoch [{epoch}/{EPOCHS}] Batch')
-            loop.set_postfix(train_loss=loss.item(),
-                             train_avg_loss=train_sum_loss / len(train_loader),
+            loop.set_postfix(train_loss_batch=loss.data.item(),
+                             train_loss_epoch=train_sum_loss / BATCH_SIZE,
                              lr=lr)
         optimizer.step()
+        writer.add_scalar("Loss", train_sum_loss / BATCH_SIZE, epoch)
 
         # 验证
         model.eval()
@@ -95,8 +102,13 @@ if __name__ == '__main__':
             correct = correct.data.item()
             acc = correct / len(test_loader.dataset)
             avgloss = test_loss / len(test_loader)
-            print('Val set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(
+            print('Val set: Average loss: {:.4f}, Accuracy: {}/{} ({:.1f}%)'.format(
                 avgloss, correct, len(test_loader.dataset), 100 * acc))
             if acc > ACC:
-                torch.save(model, 'model_' + str(epoch) + '_' + str(round(acc, 3)) + '.pth')
+                torch.save(model,
+                           './model/' + str(model._get_name()) + '_' + str(epoch) + '_' + str(round(acc, 3)) + '.pth')
                 ACC = acc
+        writer.add_scalar("Accuracy", acc, epoch)
+
+    # 训练结束 关闭绘图
+    writer.close()
