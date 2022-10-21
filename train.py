@@ -28,18 +28,18 @@ if __name__ == '__main__':
         # transforms.RandomVerticalFlip(),
         Cutout(),
         transforms.ToTensor(),
-        transforms.Normalize([0.53218746, 0.42445263, 0.37205878], [0.24561162, 0.21718305, 0.20601882])
+        transforms.Normalize([0.5322349, 0.42449042, 0.37209076], [0.24563423, 0.21720581, 0.20604016])
     ])
     transform_test = transforms.Compose([
         transforms.Resize(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
-        transforms.Normalize([0.53218746, 0.42445263, 0.37205878], [0.24561162, 0.21718305, 0.20601882])
+        transforms.Normalize([0.5322349, 0.42449042, 0.37209076], [0.24563423, 0.21720581, 0.20604016])
     ])
 
     # 读取数据
-    dataset_train = datasets.ImageFolder('dataset/train', transform=transform_train)
-    dataset_test = datasets.ImageFolder("dataset/val", transform=transform_test)
+    dataset_train = datasets.ImageFolder('./data_train/train', transform=transform_train)
+    dataset_test = datasets.ImageFolder("./data_train/val", transform=transform_test)
     print(dataset_train.class_to_idx)
 
     # 导入数据
@@ -48,9 +48,10 @@ if __name__ == '__main__':
 
     # 实例化模型并且移动到GPU
     criterion = nn.CrossEntropyLoss()
-    model = models.vgg19(pretrained=True, num_classes=3)
+    # model = models.vgg19(pretrained=True, num_classes=3)
     # model = models.resnet18(pretrained=True, num_classes=3)
-    # model = models.vit_large_patch16_224(pretrained=True, num_classes=3)
+    # model = models.vit_base_patch16_224(pretrained=True, num_classes=3)
+    model = models.vit_large_patch16_224(pretrained=True, num_classes=3)
     # num_ftrs = model.head.in_features
     # model.head = nn.Linear(num_ftrs, 3, bias=True)
     # nn.init.xavier_uniform_(model.head.weight)

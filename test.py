@@ -12,7 +12,7 @@ transform_test = transforms.Compose([
     transforms.Resize(224),
     transforms.CenterCrop(224),
     transforms.ToTensor(),
-    transforms.Normalize([0.53218746, 0.42445263, 0.37205878], [0.24561162, 0.21718305, 0.20601882])
+    transforms.Normalize([0.5143256, 0.40016153, 0.347045], [0.2527371, 0.21547443, 0.2000117])
 ])
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
