@@ -10,6 +10,11 @@ from torchtoolbox.transform import Cutout
 from tqdm import tqdm
 
 import timm.models as models
+from models.t2t_vit import *
+from utils import load_for_transfer_learning
+
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # 设置全局参数
 LR = 1e-4
@@ -46,7 +51,11 @@ if __name__ == '__main__':
 
     # 实例化模型并且移动到GPU
     criterion = nn.CrossEntropyLoss()
-    model = models.vit_base_patch16_224(pretrained=True)
+
+    # create T2TViT model
+    model = t2t_vit_14()
+    # load the pretrained weights
+    load_for_transfer_learning(model,"./pretrained/81.5_T2T_ViT_14.pth.tar" , use_ema = True,strict=False, num_classes=3)
     num_ftrs = model.head.in_features
     model.head = nn.Linear(num_ftrs, 3, bias=True)
     nn.init.xavier_uniform_(model.head.weight)

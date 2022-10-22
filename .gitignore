@@ -1,0 +1,7 @@
+
+*.png
+*.pyc
+.idea/.name
+*.pth
+*.webp
+*.tar
