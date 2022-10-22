@@ -20,7 +20,7 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 ACC = 0
 
 if __name__ == '__main__':
-    # 数据预处理
+    # Data pretreatment
     transform_train = transforms.Compose([
         transforms.Resize(224),
         transforms.CenterCrop(224),
@@ -37,16 +37,14 @@ if __name__ == '__main__':
         transforms.Normalize([0.5322349, 0.42449042, 0.37209076], [0.24563423, 0.21720581, 0.20604016])
     ])
 
-    # 读取数据
+    # Load data
     dataset_train = datasets.ImageFolder('./data_train/train', transform=transform_train)
     dataset_test = datasets.ImageFolder("./data_train/val", transform=transform_test)
     print(dataset_train.class_to_idx)
-
-    # 导入数据
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=BATCH_SIZE, shuffle=True)
     test_loader = torch.utils.data.DataLoader(dataset_test, batch_size=BATCH_SIZE, shuffle=False)
 
-    # 实例化模型并且移动到GPU
+    # Instantiate the model and move it to the GPU
     criterion = nn.CrossEntropyLoss()
     # model = models.vgg19(pretrained=True, num_classes=3)
     # model = models.resnet18(pretrained=True, num_classes=3)
@@ -57,7 +55,7 @@ if __name__ == '__main__':
     # nn.init.xavier_uniform_(model.head.weight)
     model.to(DEVICE)
 
-    # Adam优化器，学习率调低
+    # Adam optimizer, learning rate uses cos reduced
     adam = optim.Adam(model.parameters(), lr=LR)
     optimizer = optim.lr_scheduler.CosineAnnealingLR(optimizer=adam, T_max=20, eta_min=1e-9)
 
@@ -65,7 +63,7 @@ if __name__ == '__main__':
     writer = SummaryWriter("logs")
 
     for epoch in range(1, EPOCHS + 1):
-        # 训练
+        # train
         model.train()
         train_sum_loss = 0
         loop = tqdm(enumerate(train_loader), total=len(train_loader))
@@ -87,7 +85,7 @@ if __name__ == '__main__':
         optimizer.step()
         writer.add_scalar("Loss", train_sum_loss / BATCH_SIZE, epoch)
 
-        # 验证
+        # eval
         model.eval()
         test_loss = 0
         correct = 0
@@ -111,5 +109,5 @@ if __name__ == '__main__':
                 ACC = acc
         writer.add_scalar("Accuracy", acc, epoch)
 
-    # 训练结束 关闭绘图
+    # Close drawing after training
     writer.close()

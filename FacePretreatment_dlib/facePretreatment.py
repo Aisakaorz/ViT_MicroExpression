@@ -11,11 +11,11 @@ from torchvision.datasets import ImageFolder
 from tqdm import tqdm
 
 
-# 使用dlib分割人脸
+# Use dlib to crop face
 def crop(files_list, files_dir):
     for file in tqdm(files_list):
-        file_class = file.replace("\\", "/").split('/')[-3]  # 图片类别 (negative, neutral, positive)
-        file_name = file.replace("\\", "/").split('/')[-1]  # 图片文件名
+        file_class = file.replace("\\", "/").split('/')[-3]  # image class (negative, neutral, positive)
+        file_name = file.replace("\\", "/").split('/')[-1]  # image file name
         if not os.path.isdir(files_dir + '/' + file_class):
             os.makedirs(files_dir + '/' + file_class)
 
@@ -55,14 +55,14 @@ def crop(files_list, files_dir):
 
 def copy(files_list, files_dir):
     for file in tqdm(files_list):
-        file_class = file.replace("\\", "/").split('/')[-3]  # 图片类别 (negative, neutral, positive)
-        file_name = file.replace("\\", "/").split('/')[-1]  # 图片文件名
+        file_class = file.replace("\\", "/").split('/')[-3]  # image class (negative, neutral, positive)
+        file_name = file.replace("\\", "/").split('/')[-1]  # image file name
         if not os.path.isdir(files_dir + '/' + file_class):
             os.makedirs(files_dir + '/' + file_class)
         shutil.copy(file, files_dir + '/' + file_class + '/' + file_name)
 
 
-# 归一化 标准化
+# Normalization
 def get_mean_and_std(train_data):
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=1, shuffle=False, num_workers=0, pin_memory=True)
     mean = torch.zeros(3)
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     image_list = glob.glob('../data_raw/*/*/*/*.png')
     file_dir = '../data_train'
     if os.path.exists(file_dir):
-        shutil.rmtree(file_dir)  # 删除再建立
+        shutil.rmtree(file_dir)  # Delete and rebuild
         os.makedirs(file_dir)
     else:
         os.makedirs(file_dir)
@@ -90,15 +90,15 @@ if __name__ == '__main__':
     train_dir = '../data_train/train'
     val_dir = '../data_train/val'
 
-    # crop人脸并保存
+    # Crop face and save face images
     # crop(train_files, train_dir)
     # crop(val_files, val_dir)
 
-    # 若不crop则使用以下代码
+    # If you don't need to crop, use below to copy images
     copy(train_files, train_dir)
     copy(val_files, val_dir)
 
-    # 归一化 标准化
+    # Normalization
     train_dataset = ImageFolder(root=r'../data_train', transform=transforms.ToTensor())
     with open('./mean_std.txt', 'w') as file:
         file.write(str(get_mean_and_std(train_dataset)))
