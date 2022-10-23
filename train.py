@@ -6,11 +6,14 @@ import torch.utils.data.distributed
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
+from PIL import Image, ImageFile
 from tensorboardX import SummaryWriter
 from torchtoolbox.tools import mixup_data, mixup_criterion
 from torchtoolbox.transform import Cutout
 from tqdm import tqdm
 
+from models.t2t_vit import *
+from utils import load_for_transfer_learning
 
 # 设置全局参数
 LR = 1e-4
@@ -18,6 +21,7 @@ BATCH_SIZE = 32
 EPOCHS = 30
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 ACC = 0
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 if __name__ == '__main__':
     # Data pretreatment
@@ -46,13 +50,20 @@ if __name__ == '__main__':
 
     # Instantiate the model and move it to the GPU
     criterion = nn.CrossEntropyLoss()
+
     # model = models.vgg19(pretrained=True, num_classes=3)
     # model = models.resnet18(pretrained=True, num_classes=3)
     # model = models.vit_base_patch16_224(pretrained=True, num_classes=3)
-    model = models.vit_large_patch16_224(pretrained=True, num_classes=3)
+    # model = models.vit_large_patch16_224(pretrained=True, num_classes=3)
+    # create T2TViT model
+    model = t2t_vit_14()
+    # load the pretrained weights
+    load_for_transfer_learning(model,"./pretrained/81.5_T2T_ViT_14.pth.tar" , use_ema = True,strict=False, num_classes=3)
+    
     # num_ftrs = model.head.in_features
     # model.head = nn.Linear(num_ftrs, 3, bias=True)
     # nn.init.xavier_uniform_(model.head.weight)
+
     model.to(DEVICE)
 
     # Adam optimizer, learning rate uses cos reduced
