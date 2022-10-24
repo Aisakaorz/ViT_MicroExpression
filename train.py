@@ -1,18 +1,17 @@
-import timm.models as models
+import timm
 import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data
-import torch.utils.data.distributed
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 
-from PIL import Image, ImageFile
+from PIL import ImageFile
 from tensorboardX import SummaryWriter
 from torchtoolbox.tools import mixup_data, mixup_criterion
 from torchtoolbox.transform import Cutout
 from tqdm import tqdm
 
-from models.t2t_vit import *
+from models import *
 from utils import load_for_transfer_learning
 
 # 设置全局参数
@@ -51,15 +50,23 @@ if __name__ == '__main__':
     # Instantiate the model and move it to the GPU
     criterion = nn.CrossEntropyLoss()
 
-    # model = models.vgg19(pretrained=True, num_classes=3)
-    # model = models.resnet18(pretrained=True, num_classes=3)
-    # model = models.vit_base_patch16_224(pretrained=True, num_classes=3)
-    # model = models.vit_large_patch16_224(pretrained=True, num_classes=3)
-    # create T2TViT model
-    model = t2t_vit_14()
-    # load the pretrained weights
-    load_for_transfer_learning(model,"./pretrained/81.5_T2T_ViT_14.pth.tar" , use_ema = True,strict=False, num_classes=3)
-    
+    # VGG
+    # model = timm.models.vgg19(pretrained=True, num_classes=3)
+
+    # ResNet
+    # model = timm.models.resnet18(pretrained=True, num_classes=3)
+
+    # ViT
+    # model = timm.models.vit_base_patch16_224(pretrained=True, num_classes=3)
+    # model = timm.models.vit_large_patch16_224(pretrained=True, num_classes=3)
+
+    # Swin-Transformer
+    model = timm.models.swin_base_patch4_window7_224(pretrained=True, num_classes=3)
+
+    # T2T-Vit
+    # model = t2t_vit_14()
+    # load_for_transfer_learning(model, "./pretrainedModels/81.5_T2T_ViT_14.pth.tar", use_ema=True, strict=False, num_classes=3)
+
     # num_ftrs = model.head.in_features
     # model.head = nn.Linear(num_ftrs, 3, bias=True)
     # nn.init.xavier_uniform_(model.head.weight)
@@ -70,7 +77,7 @@ if __name__ == '__main__':
     adam = optim.Adam(model.parameters(), lr=LR)
     optimizer = optim.lr_scheduler.CosineAnnealingLR(optimizer=adam, T_max=20, eta_min=1e-9)
 
-    # tensorboard
+    # tensorboardX
     writer = SummaryWriter("logs")
 
     for epoch in range(1, EPOCHS + 1):
@@ -116,7 +123,8 @@ if __name__ == '__main__':
                 avgloss, correct, len(test_loader.dataset), 100 * acc))
             if acc > ACC:
                 torch.save(model,
-                           './model/' + str(model._get_name()) + '_' + str(epoch) + '_' + str(round(acc, 3)) + '.pth')
+                           './savedModels/' + str(model._get_name()) + '_' + str(epoch) + '_' + str(
+                               round(acc, 3)) + '.pth')
                 ACC = acc
         writer.add_scalar("Accuracy", acc, epoch)
 
