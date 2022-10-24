@@ -16,7 +16,7 @@ transform_test = transforms.Compose([
 ])
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = torch.load("model_23_0.868.pth")
+model = torch.load("./savedModels/model_23_0.868.pth")
 model.eval()
 model.to(DEVICE)
 
