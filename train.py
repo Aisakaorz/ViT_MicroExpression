@@ -50,6 +50,8 @@ if __name__ == '__main__':
     # Instantiate the model and move it to the GPU
     criterion = nn.CrossEntropyLoss()
 
+    # Load model
+
     # VGG
     # model = timm.models.vgg19(pretrained=True, num_classes=3)
 
