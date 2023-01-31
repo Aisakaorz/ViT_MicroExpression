@@ -1,4 +1,4 @@
-torch==1.13.0
+torch==1.13.1
 timm==0.6.12
 numpy==1.23.5
 matplotlib==3.6.2
